@@ -31,7 +31,8 @@ def main():
     else:
         old_hash = ""
 
-    send_msg("test test test")
+    if old_hash and new_hash != old_hash:
+    send_msg("🐶 update go check now")
 
     with open("last.txt", "w") as f:
         f.write(new_hash)
