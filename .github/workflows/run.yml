@@ -2,12 +2,16 @@ name: monitor
 
 on:
   schedule:
-    - cron: "*/30 * * * *"   # 每30分钟
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 jobs:
   run:
     runs-on: ubuntu-latest
+
+    env:
+      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+      CHAT_ID: ${{ secrets.CHAT_ID }}
 
     steps:
       - uses: actions/checkout@v3
