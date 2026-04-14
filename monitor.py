@@ -1,4 +1,3 @@
-
 import requests
 from bs4 import BeautifulSoup
 import hashlib
@@ -32,7 +31,7 @@ def main():
         old_hash = ""
 
     if old_hash and new_hash != old_hash:
-    send_msg("🐶 update go check now")
+        send_msg("🐶 网站更新了")
 
     with open("last.txt", "w") as f:
         f.write(new_hash)
