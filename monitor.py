@@ -40,7 +40,7 @@ def main():
     content = get_content()
     new_hash = get_hash(content)
 
-    send_email("test：email test test")
+    send_email("test：email test test！")   # test
 
     if os.path.exists("last.txt"):
         with open("last.txt", "r") as f:
@@ -48,9 +48,9 @@ def main():
     else:
         old_hash = ""
 
-if old_hash and new_hash != old_hash:
-    send_msg("🐶 网站更新")
-    send_email("🐶 网站更新")
+    if old_hash and new_hash != old_hash:
+        send_msg("🐶 update go check！")
+        send_email("🐶 update go check！")
 
     with open("last.txt", "w") as f:
         f.write(new_hash)
