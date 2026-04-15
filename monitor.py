@@ -40,8 +40,6 @@ def main():
     content = get_content()
     new_hash = get_hash(content)
 
-    send_email("test：email test test！")   # test
-
     if os.path.exists("last.txt"):
         with open("last.txt", "r") as f:
             old_hash = f.read()
