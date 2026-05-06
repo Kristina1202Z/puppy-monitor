@@ -16,28 +16,31 @@ EMAIL_PASS = os.environ.get("EMAIL_PASS")
 
 def send_msg(msg):
     if not BOT_TOKEN or not CHAT_ID:
-        print("Telegram skipped: BOT_TOKEN or CHAT_ID missing")
+        print("Telegram skipped: missing BOT_TOKEN or CHAT_ID")
         return
 
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    ids = [x.strip() for x in CHAT_ID.split(",") if x.strip()]
 
-    for chat_id in ids:
+    for chat_id in CHAT_ID.split(","):
+        chat_id = chat_id.strip()
+        if not chat_id:
+            continue
+
         r = requests.post(
             url,
             data={"chat_id": chat_id, "text": msg},
             timeout=20
         )
-        print(f"Telegram to {chat_id}: {r.status_code} {r.text}")
-        r.raise_for_status()
+        print("Telegram status:", r.status_code)
+        print("Telegram response:", r.text)
 
 
 def send_email(msg):
     if not EMAIL_USER or not EMAIL_PASS:
-        print("Email skipped: EMAIL_USER or EMAIL_PASS missing")
+        print("Email skipped: missing EMAIL_USER or EMAIL_PASS")
         return
 
-    msg_obj = MIMEText(msg)
+    msg_obj = MIMEText(msg, "plain", "utf-8")
     msg_obj["Subject"] = "🐶 Puppy Update!"
     msg_obj["From"] = EMAIL_USER
     msg_obj["To"] = EMAIL_USER
@@ -49,12 +52,34 @@ def send_email(msg):
     print("Email sent successfully")
 
 
+def notify(msg):
+    send_msg(msg)
+    send_email(msg)
+
+
 def get_content():
     headers = {
-        "User-Agent": "Mozilla/5.0"
+        "User-Agent": (
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/124.0.0.0 Safari/537.36"
+        ),
+        "Accept": (
+            "text/html,application/xhtml+xml,application/xml;q=0.9,"
+            "image/avif,image/webp,*/*;q=0.8"
+        ),
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://www.stoneyacrepuppies.ca/",
+        "Connection": "keep-alive",
     }
+
     r = requests.get(URL, headers=headers, timeout=20)
     print("Page status:", r.status_code)
+
+    if r.status_code == 403:
+        notify(f"⚠️ Puppy monitor failed: website blocked GitHub request with 403.\n{URL}")
+        raise Exception("403 Forbidden: website blocked GitHub request")
+
     r.raise_for_status()
 
     soup = BeautifulSoup(r.text, "html.parser")
@@ -88,12 +113,12 @@ def main():
     old_hash = load_old_hash()
 
     print("Old hash exists:", bool(old_hash))
+    print("Old hash:", old_hash)
     print("New hash:", new_hash)
 
     if old_hash and new_hash != old_hash:
-        message = f"🐶 网站更新了！快去看：\n{URL}"
-        send_msg(message)
-        send_email(message)
+        message = f"🐶 Stoney Acre Puppies 页面更新了！快去看：\n{URL}"
+        notify(message)
         print("Update detected and notifications sent")
     elif not old_hash:
         print("First run: saving initial hash only")
